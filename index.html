@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MOE NN Calculator</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <h2>Input</h2>
+    <div class="grid2">
+      <label>Strand A, 5′→3′ <span class="muted">preferentially modified or gapmer strand</span>
+        <textarea id="strandA" spellcheck="false">GmUmGmAmGmCmGm</textarea>
+      </label>
+      <label>Strand B, 3′→5′ <span class="muted">RNA complementary strand</span>
+        <textarea id="strandB" spellcheck="false"></textarea>
+      </label>
+    </div>
+    <div class="row">
+      <button id="autofillB">Auto-fill Strand B</button>
+      <span class="muted">Complement rules: Am/dA/A→U, Cm/dC/C→G, Gm/dG/G→C, Um/dT/U→A. Use Am, Cm, Gm and Um for 2′-MOE residues; legacy H/J/K/L notation is also accepted. Use dA, dC, dG and dT for DNA residues; single-letter T is not used.</span>
+    </div>
+    <div class="grid2">
+      <label>Calculation mode
+        <select id="mode">
+          <option value="ALT_PEG">ALT-MOE/RNA, cell-like</option>
+          <option value="ALT_dilute">ALT-MOE/RNA, non-crowding</option>
+          <option value="RRHD_PEG">RRHD-MOE/RNA, cell-like</option>
+          <option value="RRHD_dilute">RRHD-MOE/RNA, non-crowding</option>
+          <option value="unmodified_PEG">RNA/RNA, cell-like</option>
+          <option value="unmodified_dilute">RNA/RNA, non-crowding</option>
+          <option value="RNA_DNA_PEG">RNA/DNA, cell-like</option>
+          <option value="RNA_DNA_dilute">RNA/DNA, non-crowding</option>
+          <option value="mixed_PEG">Mixed gapmer auto, cell-like</option>
+          <option value="mixed_dilute">Mixed gapmer auto, non-crowding</option>
+        </select>
+      </label>
+      <label>Temperature for display, °C
+        <input id="tempC" type="number" value="37" step="0.1">
+      </label>
+    </div>
+    <label class="check"><input id="doCorr" type="checkbox" checked> Include available initiation / terminal / self-complementary corrections</label>
+    <label class="check"><input id="doApprox" type="checkbox" checked> Enable approximation rules and mark approximate rows</label>
+    <div class="row">
+      <button id="calc">Calculate</button>
+      <button id="download">Download CSV</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Result</h2>
+    <div id="message" class="msg">Ready.</div>
+    <div class="summary">
+      <div><span>ΔH° total</span><b id="sumH">—</b><small>kcal mol<sup>−1</sup></small></div>
+      <div><span>ΔS° total</span><b id="sumS">—</b><small>cal mol<sup>−1</sup> K<sup>−1</sup></small></div>
+      <div><span>ΔG°37 total</span><b id="sumG">—</b><small>kcal mol<sup>−1</sup></small></div>
+    </div>
+    <div class="tablewrap">
+      <table id="detail">
+        <thead><tr><th>#</th><th>NN pair / correction</th><th>Used parameter</th><th>Source set</th><th>Rule</th><th>ΔH°</th><th>ΔS°</th><th>ΔG°37</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Parameter set description</h2>
+    <p><b>Sequence notation:</b> Am, Cm, Gm and Um represent 2′-MOE-A, 2′-MOE-C, 2′-MOE-G and 2′-MOE-U, respectively. Legacy H/J/K/L notation is also accepted. DNA residues should be written as dA, dC, dG and dT.</p>
+    <p><b>RRHD:</b> one strand is fully 2′-MOE modified and hybridized with RNA.</p>
+    <p><b>ALT:</b> one strand contains partial/intermittent 2′-MOE modifications and is hybridized with RNA.</p>
+    <p><b>DNA/RNA:</b> DNA strand hybridized with RNA.</p>
+    <p><b>RNA/RNA:</b> unmodified RNA duplex.</p>
+    <p><b>Gapmer:</b> both terminal wing regions are 2′-MOE modified, whereas the central gap region is DNA. MOE/MOE regions are calculated using RRHD parameters, DNA/RNA regions using DNA/RNA hybrid parameters, and MOE–DNA junctions using ALT-based approximation.</p>
+    <p><b>Gapmer priority:</b> RRHD local MOE/MOE → DNA/RNA hybrid → ALT junction approximation → RNA/RNA → fallback.</p>
+    <p><b>Non-crowding condition:</b> 100 mM NaCl, 10 mM Na<sub>2</sub>HPO<sub>4</sub> (pH 7.0 at 37 °C), and 1 mM Na<sub>2</sub>EDTA.</p>
+    <p><b>Cell-like condition:</b> 40 wt% PEG200, 100 mM NaCl, 10 mM Na<sub>2</sub>HPO<sub>4</sub> (pH 7.0 at 37 °C), and 1 mM Na<sub>2</sub>EDTA.</p>
+    <p><b>Backbone limitation:</b> the current calculator uses phosphate diester (P=O) parameters. Phosphorothioate (P=S) backbone effects are not yet included and are temporarily approximated using P=O parameters.</p>
+    <p>For equivalent orientation, the calculator searches direct, reversed, strand-swapped, and reverse-strand-swapped forms of each NN pair.</p>
+    <p>Self-complementary correction is applied only when Strand A itself is self-complementary, for example 5′-UGCAUGCA-3′.</p>
+  </section>
+
+  <section class="card">
+    <h2>References</h2>
+    <ol class="refs">
+      <li>Sugimoto, N., Kierzek, R. and Turner, D.H. (1987) Biochemistry, 26.</li>
+      <li>Ghosh, S., Takahashi, S., Banerjee, D., Ohyama, T., Endoh, T., Tateishi-Karimata, H. and Sugimoto, N. (2023) Nucleic Acids Res, 51, 4101–4111.</li>
+      <li>Banerjee, D., Tateishi-Karimata, H., Ohyama, T., Ghosh, S., Endoh, T., Takahashi, S. and Sugimoto, N. (2020) Nucleic Acids Res, 48, 12042.</li>
+      <li>Banerjee, D., Tateishi-Karimata, H., Toplishek, M., Ohyama, T., Ghosh, S., Takahashi, S., Trajkovski, M., Plavec, J. and Sugimoto, N. (2023) J. Am. Chem. Soc., 145, 23503.</li>
+    </ol>
+  </section>
+</main>
+<script src="js/parameters.js"></script>
+<script src="js/calculator.js"></script>
+</body>
+</html>
