@@ -9,7 +9,7 @@
 <body>
 <main class="wrap">
   <section class="card">
-    <h2>Input</h2>
+    <h2>Sequence Input</h2>
     <div class="grid2">
       <label>Strand A, 5′→3′ <span class="muted">preferentially modified or gapmer strand</span>
         <textarea id="strandA" spellcheck="false">GmUmGmAmGmCmGm</textarea>
@@ -50,16 +50,16 @@
   </section>
 
   <section class="card">
-    <h2>Result</h2>
+    <h2>Thermodynamic Parameters</h2>
     <div id="message" class="msg">Ready.</div>
     <div class="summary">
-      <div><span>ΔH° total</span><b id="sumH">—</b><small>kcal mol<sup>−1</sup></small></div>
-      <div><span>ΔS° total</span><b id="sumS">—</b><small>cal mol<sup>−1</sup> K<sup>−1</sup></small></div>
-      <div><span>ΔG°37 total</span><b id="sumG">—</b><small>kcal mol<sup>−1</sup></small></div>
+      <div><span>Δ<i>H</i>° total</span><b id="sumH">—</b><small>kcal mol<sup>−1</sup></small></div>
+      <div><span>Δ<i>S</i>° total</span><b id="sumS">—</b><small>cal mol<sup>−1</sup> K<sup>−1</sup></small></div>
+      <div><span>Δ<i>G</i>°<sub>37</sub> total</span><b id="sumG">—</b><small>kcal mol<sup>−1</sup></small></div>
     </div>
     <div class="tablewrap">
       <table id="detail">
-        <thead><tr><th>#</th><th>NN pair / correction</th><th>Used parameter</th><th>Source set</th><th>Rule</th><th>ΔH°</th><th>ΔS°</th><th>ΔG°37</th></tr></thead>
+        <thead><tr><th>#</th><th>NN pair / correction</th><th>Used parameter</th><th>Source set</th><th>Rule</th><th>Δ<i>H</i>°</th><th>Δ<i>S</i>°</th><th>Δ<i>G</i>°<sub>37</sub></th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
