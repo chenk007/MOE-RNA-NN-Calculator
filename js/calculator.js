@@ -17,7 +17,7 @@ function $(id){return document.getElementById(id);}
 function fmt(x){return (typeof x==="number" && isFinite(x)) ? x.toFixed(2) : "—";}
 function sanitize(s){return (s||"").replace(/\s+/g,"").replace(/’|‘/g,"'");}
 
-function tokenize(seq){
+function tokenize(seq, allowCompactDNA=false){
   seq = sanitize(seq);
   const out = [];
   for(let i=0;i<seq.length;i++){
@@ -35,11 +35,20 @@ function tokenize(seq){
     }
 
     // DNA notation for user input is dA, dC, dG, or dT.
-    // Important: parse only one DNA residue after each d.
-    // This avoids misreading junctions such as dCGm as dC + dG + unsupported m.
+    // For user input, parse only one DNA residue after each d, so dCGm is read as dC + Gm.
+    // For internal parameter keys, compact DNA strings such as dAG or dTT are allowed.
     if((ch0==="d" || ch0==="D") && i+1<seq.length){
       const b = seq[i+1].toUpperCase();
       if(!"ACGT".includes(b)) throw new Error("DNA residues must be written as dA, dC, dG, or dT.");
+      if(allowCompactDNA){
+        let j=i+1;
+        while(j<seq.length && "ACGT".includes(seq[j].toUpperCase())) j++;
+        // If the DNA run is followed by m, the last A/C/G/U belongs to an MOE token (e.g., dCGm = dC + Gm).
+        if(j<seq.length && seq[j].toLowerCase()==="m" && j>i+2) j--;
+        for(let k=i+1;k<j;k++) out.push("d" + seq[k].toUpperCase());
+        i = j-1;
+        continue;
+      }
       out.push("d" + b);
       i += 1;
       continue;
@@ -60,7 +69,7 @@ function displayKey(key){
   if(!key || key==="—" || key==="not found") return key;
   if(!key.includes("/")) return key;
   const [a,b] = key.split("/");
-  try{return displayTokens(tokenize(a)) + "/" + displayTokens(tokenize(b));}
+  try{return displayTokens(tokenize(a,true)) + "/" + displayTokens(tokenize(b,true));}
   catch(e){return key.replace(/[HJKL]/g, m=>internalToMoeLong[m]||m);}
 }
 
@@ -85,7 +94,7 @@ function splitPair(key){
 }
 function reverseStr(s){
   // preserve dA tokens where present
-  const toks = tokenize(s);
+  const toks = tokenize(s,true);
   return toks.reverse().join("");
 }
 function keyVariants(key){

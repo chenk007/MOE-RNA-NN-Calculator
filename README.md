@@ -35,3 +35,6 @@ Cell-like condition: 40 wt% PEG200, 100 mM NaCl, 10 mM Na2HPO4 (pH 7.0 at 37 °C
 ## Limitation
 
 The current version is parameterized for phosphodiester (P=O) backbones. Phosphorothioate (P=S) backbones are currently approximated using P=O parameters.
+
+
+V6.8: Fixed compact DNA parameter-key parsing so internal keys such as dTT do not trigger the single-letter T warning, while user input such as dCGm is still parsed as dC + Gm.
