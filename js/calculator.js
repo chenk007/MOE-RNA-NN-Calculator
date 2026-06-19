@@ -34,20 +34,14 @@ function tokenize(seq){
       }
     }
 
-    // DNA notation can be written either as dAdGdT or compact internal keys such as dAG/dTT.
-    // Both forms are tokenized to [dA,dG,dT]. Single-letter T remains invalid for user input.
+    // DNA notation for user input is dA, dC, dG, or dT.
+    // Important: parse only one DNA residue after each d.
+    // This avoids misreading junctions such as dCGm as dC + dG + unsupported m.
     if((ch0==="d" || ch0==="D") && i+1<seq.length){
-      let j = i + 1;
-      let consumed = false;
-      while(j < seq.length){
-        const b = seq[j].toUpperCase();
-        if(!"ACGT".includes(b)) break;
-        out.push("d" + b);
-        consumed = true;
-        j++;
-      }
-      if(!consumed) throw new Error("DNA residues must be written as dA, dC, dG, or dT.");
-      i = j - 1;
+      const b = seq[i+1].toUpperCase();
+      if(!"ACGT".includes(b)) throw new Error("DNA residues must be written as dA, dC, dG, or dT.");
+      out.push("d" + b);
+      i += 1;
       continue;
     }
 
