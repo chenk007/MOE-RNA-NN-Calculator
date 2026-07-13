@@ -3,31 +3,112 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>MOE NN Calculator</title>
+  <title>2′-MOE Oligonucleotide Stability Calculator</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .hero{margin-bottom:1rem;padding:1rem 1.25rem;border-radius:14px;background:linear-gradient(135deg,#f7f9fc,#eef3f8);border:1px solid #dfe6ee}
+    .hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:1rem;align-items:stretch}
+    .hero h1{margin:0 0 .3rem;font-size:clamp(1.45rem,2.3vw,2rem);line-height:1.08;white-space:nowrap}
+    .hero p{margin:.3rem 0 .55rem;color:#405064;max-width:620px;line-height:1.25}
+    .usage-guide{border:1px solid #d8e1ea;border-radius:12px;background:#fff;padding:.85rem .95rem}
+    .usage-guide h3{margin:0 0 .7rem;font-size:.95rem}
+    .guide-flow{display:grid;gap:.5rem}
+    .guide-step{display:grid;grid-template-columns:28px 1fr;gap:.6rem;align-items:start;padding:.5rem .6rem;border-radius:9px;background:#f7f9fc;border:1px solid #e3e9ef}
+    .guide-num{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#dfeaf4;font-weight:700;font-size:.78rem}
+    .guide-text{font-size:.8rem;line-height:1.25;white-space:normal}
+    .guide-text strong{display:block;margin-bottom:.12rem}
+    @media (max-width:980px){
+      .hero-grid{grid-template-columns:1fr}
+      .hero h1{white-space:normal}
+      .usage-guide{margin-top:.25rem}
+    }
+      .guide-arrow{transform:rotate(90deg);text-align:center}
+      .guide-step{min-height:auto}
+    }
+    .eyebrow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#607086}
+    .section-note{margin:-.35rem 0 1rem;color:#607086}
+    .guide{margin-top:.7rem;padding:.8rem .9rem;border-radius:10px;background:#f7f9fc;border:1px solid #e3e9ef}
+    .guide code{white-space:nowrap}
+    .result-help{margin:.25rem 0 1rem;color:#607086}
+    details.info{margin:.65rem 0;border:1px solid #e1e6ec;border-radius:10px;background:#fff}
+    details.info summary{cursor:pointer;padding:.85rem 1rem;font-weight:700}
+    details.info>div{padding:0 1rem 1rem}
+    .capabilities{display:grid;grid-template-columns:1fr;gap:.42rem;margin-top:.6rem;max-width:620px}
+    .capability{display:block;padding:.42rem .75rem;border:1px solid #dfe6ee;border-radius:999px;background:#fff;font-size:.95rem;line-height:1.25}
+    .capability strong{font-weight:700;font-size:1rem}
+  textarea{font-family:Consolas,'Courier New',monospace;font-size:.9rem;}
+    .heading-note{font-size:.86rem;font-weight:400;color:#607086;margin-left:.55rem}
+    @media (max-width:760px){.heading-note{display:block;margin:.25rem 0 0}}
+    .unit-inline{display:inline !important;font-size:.78rem;font-weight:400;color:#607086;white-space:nowrap;margin-left:0}
+    .summary > div > span:first-child{display:block;white-space:nowrap}
+    .single-field{margin-top:.15rem}
+    .single-field label{display:block}
+    .single-field select{width:100%}
+    .capability sub,.summary sub,th sub{font-size:.72em;vertical-align:sub;line-height:0}
+    .parameter-label{display:inline-flex !important;align-items:baseline;gap:.18rem;font-size:.92rem;line-height:1.2;white-space:nowrap}
+</style>
 </head>
 <body>
 <main class="wrap">
+  <header class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Web-based nearest-neighbour prediction tool</div>
+        <h1>2′-MOE Oligonucleotide Stability Calculator</h1>
+        <p>Predict sequence-dependent ΔH°, ΔS° and ΔG° values for RNA/RNA, RNA/DNA, RRHD-, ALT- and<br>gapmer-type duplexes under non-crowding and cell-like conditions.</p>
+        <div class="capabilities" aria-label="Supported calculations and outputs">
+          <span class="capability"><strong>Duplexes:</strong> RNA/RNA · RNA/DNA · fully 2′-MOE-modified RNA/RNA · partially 2′-MOE-modified RNA/RNA · gapmer</span>
+          <span class="capability"><strong>Conditions:</strong> non-crowding · cell-like</span>
+          <span class="capability"><strong>Outputs:</strong> Δ𝐻° · Δ𝑆° · Δ𝐺°₃₇ · NN breakdown · CSV</span>
+        </div>
+      </div>
+      <aside class="usage-guide" aria-label="Quick usage guide">
+        <h3>How to use</h3>
+        <div class="guide-flow">
+          <div class="guide-step">
+            <div class="guide-num">1</div>
+            <div class="guide-text">
+              <strong>Enter sequences</strong>
+              Input Strand A and auto-fill Strand B.
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">2</div>
+            <div class="guide-text">
+              <strong>Select mode</strong>
+              Choose the duplex type and solution condition.
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-num">3</div>
+            <div class="guide-text">
+              <strong>Calculate</strong>
+              Run the prediction and review the outputs.
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </header>
   <section class="card">
-    <h2>Sequence Input</h2>
+    <h2>Sequence Input <span class="heading-note">(Accepted notation: RNA, A/C/G/U; DNA, dA/dC/dG/dT; 2′-MOE RNA, Am/Cm/Gm/Um)</span></h2>
     <div class="grid2">
-      <label>Strand A, 5′→3′ <span class="muted">preferentially modified or gapmer strand</span>
-        <textarea id="strandA" spellcheck="false">GmUmGmAmGmCmGm</textarea>
+      <label>Strand A, 5′→3′ <span class="muted">modified, DNA-containing, or gapmer strand</span>
+        <textarea id="strandA" spellcheck="false">AmAmGmCmGmUmAmGm</textarea>
       </label>
-      <label>Strand B, 3′→5′ <span class="muted">RNA complementary strand</span>
-        <textarea id="strandB" spellcheck="false"></textarea>
+      <label>Strand B, 3′→5′ <span class="muted">complementary RNA strand</span>
+        <textarea id="strandB" spellcheck="false">UUCGCAUC</textarea>
       </label>
     </div>
     <div class="row">
       <button id="autofillB">Auto-fill Strand B</button>
-      <span class="muted">Complement rules: Am/dA/A→U, Cm/dC/C→G, Gm/dG/G→C, Um/dT/U→A. Use Am, Cm, Gm and Um for 2′-MOE residues; legacy H/J/K/L notation is also accepted. Use dA, dC, dG and dT for DNA residues; single-letter T is not used.</span>
     </div>
-    <div class="grid2">
+    <div class="single-field">
       <label>Calculation mode
         <select id="mode">
           <option value="ALT_PEG">ALT-MOE/RNA, cell-like</option>
           <option value="ALT_dilute">ALT-MOE/RNA, non-crowding</option>
-          <option value="RRHD_PEG">RRHD-MOE/RNA, cell-like</option>
+          <option value="RRHD_PEG" selected>RRHD-MOE/RNA, cell-like</option>
           <option value="RRHD_dilute">RRHD-MOE/RNA, non-crowding</option>
           <option value="unmodified_PEG">RNA/RNA, cell-like</option>
           <option value="unmodified_dilute">RNA/RNA, non-crowding</option>
@@ -37,12 +118,10 @@
           <option value="mixed_dilute">Mixed gapmer auto, non-crowding</option>
         </select>
       </label>
-      <label>Temperature for display, °C
-        <input id="tempC" type="number" value="37" step="0.1">
-      </label>
     </div>
-    <label class="check"><input id="doCorr" type="checkbox" checked> Include available initiation / terminal / self-complementary corrections</label>
-    <label class="check"><input id="doApprox" type="checkbox" checked> Enable approximation rules and mark approximate rows</label>
+    <input id="tempC" type="hidden" value="37">
+    <input id="doCorr" type="checkbox" checked hidden>
+    <label class="check"><input id="doApprox" type="checkbox" checked> Allow parameter approximation when an exact parameter is unavailable</label>
     <div class="row">
       <button id="calc">Calculate</button>
       <button id="download">Download CSV</button>
@@ -50,35 +129,55 @@
   </section>
 
   <section class="card">
-    <h2>Thermodynamic Parameters</h2>
+    <h2>Predicted Thermodynamic Parameters <span class="heading-note">(Total values with NN contribution details)</span></h2>
     <div id="message" class="msg">Ready.</div>
     <div class="summary">
-      <div><span>Δ<i>H</i>° total</span><b id="sumH">—</b><small>kcal mol<sup>−1</sup></small></div>
-      <div><span>Δ<i>S</i>° total</span><b id="sumS">—</b><small>cal mol<sup>−1</sup> K<sup>−1</sup></small></div>
-      <div><span>Δ<i>G</i>°<sub>37</sub> total</span><b id="sumG">—</b><small>kcal mol<sup>−1</sup></small></div>
+      <div><span class="parameter-label">Δ𝐻° total <span class="unit-inline">(kcal mol<sup>−1</sup>)</span></span><b id="sumH">—</b></div>
+      <div><span class="parameter-label">Δ𝑆° total <span class="unit-inline">(cal mol<sup>−1</sup> K<sup>−1</sup>)</span></span><b id="sumS">—</b></div>
+      <div><span class="parameter-label">Δ𝐺°₃₇ total <span class="unit-inline">(kcal mol<sup>−1</sup>)</span></span><b id="sumG">—</b></div>
     </div>
     <div class="tablewrap">
       <table id="detail">
-        <thead><tr><th>#</th><th>NN pair / correction</th><th>Used parameter</th><th>Source set</th><th>Rule</th><th>Δ<i>H</i>°</th><th>Δ<i>S</i>°</th><th>Δ<i>G</i>°<sub>37</sub></th></tr></thead>
+        <thead><tr><th>#</th><th>NN pair / correction</th><th>Used parameter</th><th>Source set</th><th>Rule</th><th>Δ𝐻°</th><th>Δ𝑆°</th><th>Δ𝐺°₃₇</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
   </section>
 
   <section class="card">
-    <h2>Parameter set description</h2>
-    <p><b>Sequence notation:</b> Am, Cm, Gm and Um represent 2′-MOE-A, 2′-MOE-C, 2′-MOE-G and 2′-MOE-U, respectively. Legacy H/J/K/L notation is also accepted. DNA residues should be written as dA, dC, dG and dT.</p>
-    <p><b>RRHD:</b> one strand is fully 2′-MOE modified and hybridized with RNA.</p>
-    <p><b>ALT:</b> one strand contains partial/intermittent 2′-MOE modifications and is hybridized with RNA.</p>
-    <p><b>DNA/RNA:</b> DNA strand hybridized with RNA.</p>
-    <p><b>RNA/RNA:</b> unmodified RNA duplex.</p>
-    <p><b>Gapmer:</b> both terminal wing regions are 2′-MOE modified, whereas the central gap region is DNA. MOE/MOE regions are calculated using RRHD parameters, DNA/RNA regions using DNA/RNA hybrid parameters, and MOE–DNA junctions using ALT-based approximation.</p>
-    <p><b>Gapmer priority:</b> RRHD local MOE/MOE → DNA/RNA hybrid → ALT junction approximation → RNA/RNA → fallback.</p>
-    <p><b>Non-crowding condition:</b> 100 mM NaCl, 10 mM Na<sub>2</sub>HPO<sub>4</sub> (pH 7.0 at 37 °C), and 1 mM Na<sub>2</sub>EDTA.</p>
-    <p><b>Cell-like condition:</b> 40 wt% PEG200, 100 mM NaCl, 10 mM Na<sub>2</sub>HPO<sub>4</sub> (pH 7.0 at 37 °C), and 1 mM Na<sub>2</sub>EDTA.</p>
-    <p><b>Backbone limitation:</b> the current calculator uses phosphate diester (P=O) parameters. Phosphorothioate (P=S) backbone effects are not yet included and are temporarily approximated using P=O parameters.</p>
-    <p>For equivalent orientation, the calculator searches direct, reversed, strand-swapped, and reverse-strand-swapped forms of each NN pair.</p>
-    <p>Self-complementary correction is applied only when Strand A itself is self-complementary, for example 5′-UGCAUGCA-3′.</p>
+    <h2>Calculation Methods and Parameter Sets</h2>
+    <p class="section-note">Expanded methodological information is provided below without interrupting the main calculation workflow.</p>
+
+    <details class="info" open>
+      <summary>Sequence notation and duplex types</summary>
+      <div>
+        <p><b>Sequence notation:</b> Am, Cm, Gm and Um represent 2′-MOE-A, 2′-MOE-C, 2′-MOE-G and 2′-MOE-U, respectively. Legacy H/J/K/L notation is also accepted. DNA residues should be written as dA, dC, dG and dT.</p>
+        <p><b>RRHD:</b> one strand is fully 2′-MOE modified and hybridized with RNA.</p>
+        <p><b>ALT:</b> one strand contains partial or intermittent 2′-MOE modifications and is hybridized with RNA.</p>
+        <p><b>DNA/RNA:</b> a DNA strand hybridized with RNA.</p>
+        <p><b>RNA/RNA:</b> an unmodified RNA duplex.</p>
+        <p><b>Gapmer:</b> both terminal wing regions are 2′-MOE modified, whereas the central gap region is DNA.</p>
+      </div>
+    </details>
+
+    <details class="info">
+      <summary>Parameter assignment and correction rules</summary>
+      <div>
+        <p>For gapmers, MOE/MOE regions are calculated using RRHD parameters, DNA/RNA regions using DNA/RNA hybrid parameters, and MOE–DNA junctions using ALT-based approximation.</p>
+        <p><b>Assignment priority:</b> RRHD local MOE/MOE → DNA/RNA hybrid → ALT junction approximation → RNA/RNA → fallback.</p>
+        <p>For equivalent orientation, the calculator searches direct, reversed, strand-swapped, and reverse-strand-swapped forms of each NN pair.</p>
+        <p>Symmetry correction is applied only when Strand A itself is self-complementary, for example 5′-UGCAUGCA-3′.</p>
+      </div>
+    </details>
+
+    <details class="info">
+      <summary>Experimental conditions and current limitations</summary>
+      <div>
+        <p><b>Non-crowding condition:</b> 100 mM NaCl, 10 mM Na<sub>2</sub>HPO<sub>4</sub> (pH 7.0 at 37 °C), and 1 mM Na<sub>2</sub>EDTA.</p>
+        <p><b>Cell-like condition:</b> 40 wt% PEG200, 100 mM NaCl, 10 mM Na<sub>2</sub>HPO<sub>4</sub> (pH 7.0 at 37 °C), and 1 mM Na<sub>2</sub>EDTA.</p>
+        <p><b>Backbone limitation:</b> the current calculator uses phosphate diester (P=O) parameters. Phosphorothioate (P=S) effects are not yet included and are temporarily approximated using P=O parameters.</p>
+      </div>
+    </details>
   </section>
 
   <section class="card">
