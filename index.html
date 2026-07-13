@@ -6,7 +6,7 @@
   <title>2′-MOE Oligonucleotide Stability Calculator</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .hero{margin-bottom:1rem;padding:1rem 1.25rem;border-radius:14px;background:linear-gradient(135deg,#f7f9fc,#eef3f8);border:1px solid #dfe6ee}
+    .hero{margin-bottom:.45rem;padding:1rem 1.25rem;border-radius:14px;background:linear-gradient(135deg,#f7f9fc,#eef3f8);border:1px solid #dfe6ee}
     .hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:1rem;align-items:stretch}
     .hero h1{margin:0 0 .3rem;font-size:clamp(1.45rem,2.3vw,2rem);line-height:1.08;white-space:nowrap}
     .hero p{margin:.3rem 0 .55rem;color:#405064;max-width:620px;line-height:1.25}
@@ -46,6 +46,10 @@
     .single-field select{width:100%}
     .capability sub,.summary sub,th sub{font-size:.72em;vertical-align:sub;line-height:0}
     .parameter-label{display:inline-flex !important;align-items:baseline;gap:.18rem;font-size:.92rem;line-height:1.2;white-space:nowrap}
+    .wrap > .card{margin:.45rem 0 !important}
+    .wrap > .hero + .card{margin-top:0 !important}
+    .wrap > .card + .card{margin-top:.45rem !important}
+    #message{margin-top:.55rem;margin-bottom:.55rem}
 </style>
 </head>
 <body>
@@ -57,7 +61,7 @@
         <h1>2′-MOE Oligonucleotide Stability Calculator</h1>
         <p>Predict sequence-dependent ΔH°, ΔS° and ΔG° values for RNA/RNA, RNA/DNA, RRHD-, ALT- and<br>gapmer-type duplexes under non-crowding and cell-like conditions.</p>
         <div class="capabilities" aria-label="Supported calculations and outputs">
-          <span class="capability"><strong>Duplexes:</strong> RNA/RNA · RNA/DNA · fully 2′-MOE-modified RNA/RNA · partially 2′-MOE-modified RNA/RNA · gapmer</span>
+          <span class="capability"><strong>Duplexes:</strong> RNA/RNA · RNA/DNA · fully 2′-MOE-modified RNA/RNA (RRHD) · partially 2′-MOE-modified RNA/RNA (ALT) · gapmer</span>
           <span class="capability"><strong>Conditions:</strong> non-crowding · cell-like</span>
           <span class="capability"><strong>Outputs:</strong> Δ𝐻° · Δ𝑆° · Δ𝐺°₃₇ · NN breakdown · CSV</span>
         </div>
@@ -94,10 +98,10 @@
     <h2>Sequence Input <span class="heading-note">(Accepted notation: RNA, A/C/G/U; DNA, dA/dC/dG/dT; 2′-MOE RNA, Am/Cm/Gm/Um)</span></h2>
     <div class="grid2">
       <label>Strand A, 5′→3′ <span class="muted">modified, DNA-containing, or gapmer strand</span>
-        <textarea id="strandA" spellcheck="false">AmAmGmCmGmUmAmGm</textarea>
+        <textarea id="strandA" spellcheck="false">GmCmCmUmCmdAdGdTdCdTdGdCdTdTdCGmCmAmCmCm</textarea>
       </label>
       <label>Strand B, 3′→5′ <span class="muted">complementary RNA strand</span>
-        <textarea id="strandB" spellcheck="false">UUCGCAUC</textarea>
+        <textarea id="strandB" spellcheck="false">CGGAGUCAGACGAAGCGUGG</textarea>
       </label>
     </div>
     <div class="row">
@@ -108,13 +112,13 @@
         <select id="mode">
           <option value="ALT_PEG">ALT-MOE/RNA, cell-like</option>
           <option value="ALT_dilute">ALT-MOE/RNA, non-crowding</option>
-          <option value="RRHD_PEG" selected>RRHD-MOE/RNA, cell-like</option>
+          <option value="RRHD_PEG">RRHD-MOE/RNA, cell-like</option>
           <option value="RRHD_dilute">RRHD-MOE/RNA, non-crowding</option>
           <option value="unmodified_PEG">RNA/RNA, cell-like</option>
           <option value="unmodified_dilute">RNA/RNA, non-crowding</option>
           <option value="RNA_DNA_PEG">RNA/DNA, cell-like</option>
           <option value="RNA_DNA_dilute">RNA/DNA, non-crowding</option>
-          <option value="mixed_PEG">Mixed gapmer auto, cell-like</option>
+          <option value="mixed_PEG" selected>Mixed gapmer auto, cell-like</option>
           <option value="mixed_dilute">Mixed gapmer auto, non-crowding</option>
         </select>
       </label>
@@ -130,12 +134,12 @@
 
   <section class="card">
     <h2>Predicted Thermodynamic Parameters <span class="heading-note">(Total values with NN contribution details)</span></h2>
-    <div id="message" class="msg">Ready.</div>
     <div class="summary">
       <div><span class="parameter-label">Δ𝐻° total <span class="unit-inline">(kcal mol<sup>−1</sup>)</span></span><b id="sumH">—</b></div>
       <div><span class="parameter-label">Δ𝑆° total <span class="unit-inline">(cal mol<sup>−1</sup> K<sup>−1</sup>)</span></span><b id="sumS">—</b></div>
       <div><span class="parameter-label">Δ𝐺°₃₇ total <span class="unit-inline">(kcal mol<sup>−1</sup>)</span></span><b id="sumG">—</b></div>
     </div>
+    <div id="message" class="msg">Ready.</div>
     <div class="tablewrap">
       <table id="detail">
         <thead><tr><th>#</th><th>NN pair / correction</th><th>Used parameter</th><th>Source set</th><th>Rule</th><th>Δ𝐻°</th><th>Δ𝑆°</th><th>Δ𝐺°₃₇</th></tr></thead>
