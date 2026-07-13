@@ -50,6 +50,22 @@
     .wrap > .hero + .card{margin-top:0 !important}
     .wrap > .card + .card{margin-top:.45rem !important}
     #message{margin-top:.55rem;margin-bottom:.55rem}
+    .step-callout{display:grid;grid-template-columns:30px 1fr;gap:.65rem;align-items:start;
+      padding:.6rem .75rem;border:1px solid #cfd9e4;border-left:4px solid #0f8078;
+      border-radius:9px;background:#f7fafc;color:#111;margin:.55rem 0}
+    .step-callout.compact{margin:.45rem 0 .55rem}
+    .step-badge{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+      background:#dfeaf4;color:#111;font-weight:700;font-size:.82rem}
+    .step-callout strong{color:#111}
+    .step-title{font-weight:700;color:#111;margin-right:.35rem}
+    .step-body{font-size:.84rem;line-height:1.35;color:#222}
+    .step-lines{display:grid;gap:.18rem;margin-top:.18rem}
+    .action-grid{display:grid;grid-template-columns:auto 1fr;gap:.75rem;align-items:center;margin-top:.45rem}
+    .action-grid .row{margin:0}
+    .output-anchor{border-left:4px solid #0f8078;padding-left:.55rem}
+    @media (max-width:820px){
+      .action-grid{grid-template-columns:1fr}
+    }
 </style>
 </head>
 <body>
@@ -95,7 +111,17 @@
     </div>
   </header>
   <section class="card">
-    <h2>Sequence Input <span class="heading-note">(Accepted notation: RNA, A/C/G/U; DNA, dA/dC/dG/dT; 2′-MOE RNA, Am/Cm/Gm/Um)</span></h2>
+    <h2>Sequence Input</h2>
+    <div class="step-callout compact">
+      <div class="step-badge">1</div>
+      <div class="step-body">
+        <span class="step-title">Sequence Input.</span>
+        Enter <strong>Strand A</strong> and <strong>Strand B</strong> in the fields below.
+        <div class="step-lines">
+          <div><strong>Accepted notation:</strong> RNA, A/C/G/U; DNA, dA/dC/dG/dT; 2′-MOE RNA, Am/Cm/Gm/Um.</div>
+        </div>
+      </div>
+    </div>
     <div class="grid2">
       <label>Strand A, 5′→3′ <span class="muted">modified, DNA-containing, or gapmer strand</span>
         <textarea id="strandA" spellcheck="false">GmCmCmUmCmdAdGdTdCdTdGdCdTdTdCGmCmAmCmCm</textarea>
@@ -123,17 +149,37 @@
         </select>
       </label>
     </div>
+    <div class="step-callout compact">
+      <div class="step-badge">2</div>
+      <div class="step-body">
+        <span class="step-title">Mode Selection &amp; Available Options.</span>
+        Choose the duplex type and solution condition.
+        <div class="step-lines">
+          <div><strong>Duplexes:</strong> RNA/RNA; RNA/DNA; fully 2′-MOE-modified RNA/RNA (RRHD); partially 2′-MOE-modified RNA/RNA (ALT); gapmer.</div>
+          <div><strong>Solutions:</strong> non-crowding; cell-like.</div>
+        </div>
+      </div>
+    </div>
     <input id="tempC" type="hidden" value="37">
     <input id="doCorr" type="checkbox" checked hidden>
     <label class="check"><input id="doApprox" type="checkbox" checked> Allow parameter approximation when an exact parameter is unavailable</label>
-    <div class="row">
-      <button id="calc">Calculate</button>
-      <button id="download">Download CSV</button>
+    <div class="action-grid">
+      <div class="row">
+        <button id="calc">Calculate</button>
+        <button id="download">Download CSV</button>
+      </div>
+      <div class="step-callout compact">
+        <div class="step-badge">3</div>
+        <div class="step-body">
+          <span class="step-title">Execution &amp; Output.</span>
+          Click <strong>Calculate</strong> to obtain Δ𝐻°, Δ𝑆°, Δ𝐺°₃₇ and the detailed NN contribution breakdown.
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="card">
-    <h2>Predicted Thermodynamic Parameters <span class="heading-note">(Total values with NN contribution details)</span></h2>
+    <h2 class="output-anchor">Predicted Thermodynamic Parameters <span class="heading-note">(Step 3 output: total values and NN contribution details)</span></h2>
     <div class="summary">
       <div><span class="parameter-label">Δ𝐻° total <span class="unit-inline">(kcal mol<sup>−1</sup>)</span></span><b id="sumH">—</b></div>
       <div><span class="parameter-label">Δ𝑆° total <span class="unit-inline">(cal mol<sup>−1</sup> K<sup>−1</sup>)</span></span><b id="sumS">—</b></div>
