@@ -4,19 +4,19 @@ Static web calculator for RNA/RNA, RNA/DNA, RRHD-MOE/RNA, ALT-MOE/RNA, and mixed
 
 ## Online notation
 
-- `Am` = 2′-MOE-A
-- `Cm` = 2′-MOE-C
-- `Gm` = 2′-MOE-G
-- `Um` = 2′-MOE-U
+- `Ae` = 2′-MOE-A
+- `Ce` = 2′-MOE-C
+- `Ge` = 2′-MOE-G
+- `Ue` = 2′-MOE-U
 - `dA`, `dC`, `dG`, `dT` = DNA residues
 - `A`, `C`, `G`, `U` = RNA residues
 
 Legacy H/J/K/L notation is also accepted internally:
 
-- H = Am
-- J = Cm
-- K = Gm
-- L = Um
+- H = Ae
+- J = Ce
+- K = Ge
+- L = Ue
 
 ## Parameter sets
 
@@ -37,4 +37,4 @@ Cell-like condition: 40 wt% PEG200, 100 mM NaCl, 10 mM Na2HPO4 (pH 7.0 at 37 °C
 The current version is parameterized for phosphodiester (P=O) backbones. Phosphorothioate (P=S) backbones are currently approximated using P=O parameters.
 
 
-V6.8: Fixed compact DNA parameter-key parsing so internal keys such as dTT do not trigger the single-letter T warning, while user input such as dCGm is still parsed as dC + Gm.
+V6.8: Fixed compact DNA parameter-key parsing so internal keys such as dTT do not trigger the single-letter T warning, while user input such as dCGe is still parsed as dC + Ge.
