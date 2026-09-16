@@ -10,8 +10,8 @@ const compRNA = {"A":"U","C":"G","G":"C","U":"A","H":"U","J":"G","K":"C","L":"A"
 const moeToRNA = {"H":"A","J":"C","K":"G","L":"U"};
 const dnaToRNA = {"dA":"A","dC":"C","dG":"G","dT":"U"};
 const dnaLetters = {"dA":"A","dC":"C","dG":"G","dT":"T"};
-const moeLongToInternal = {"AM":"H","CM":"J","GM":"K","UM":"L"};
-const internalToMoeLong = {"H":"Am","J":"Cm","K":"Gm","L":"Um"};
+const moeLongToInternal = {"AE":"H","CE":"J","GE":"K","UE":"L"};
+const internalToMoeLong = {"H":"Ae","J":"Ce","K":"Ge","L":"Ue"};
 
 function $(id){return document.getElementById(id);}
 function fmt(x){return (typeof x==="number" && isFinite(x)) ? x.toFixed(2) : "—";}
@@ -23,10 +23,10 @@ function tokenize(seq, allowCompactDNA=false){
   for(let i=0;i<seq.length;i++){
     const ch0 = seq[i];
 
-    // New user-facing MOE notation: Am, Cm, Gm, Um.
+    // User-facing MOE notation: Ae, Ce, Ge, Ue.
     // Internally these are converted to the original parameter symbols H, J, K, L (A,C,G,U = H,J,K,L).
-    if(i+1 < seq.length && seq[i+1].toLowerCase() === "m"){
-      const key = ch0.toUpperCase() + "M";
+    if(i+1 < seq.length && seq[i+1].toLowerCase() === "e"){
+      const key = ch0.toUpperCase() + "E";
       if(moeLongToInternal[key]){
         out.push(moeLongToInternal[key]);
         i += 1;
@@ -35,7 +35,7 @@ function tokenize(seq, allowCompactDNA=false){
     }
 
     // DNA notation for user input is dA, dC, dG, or dT.
-    // For user input, parse only one DNA residue after each d, so dCGm is read as dC + Gm.
+    // For user input, parse only one DNA residue after each d, so dCGe is read as dC + Ge.
     // For internal parameter keys, compact DNA strings such as dAG or dTT are allowed.
     if((ch0==="d" || ch0==="D") && i+1<seq.length){
       const b = seq[i+1].toUpperCase();
@@ -43,8 +43,8 @@ function tokenize(seq, allowCompactDNA=false){
       if(allowCompactDNA){
         let j=i+1;
         while(j<seq.length && "ACGT".includes(seq[j].toUpperCase())) j++;
-        // If the DNA run is followed by m, the last A/C/G/U belongs to an MOE token (e.g., dCGm = dC + Gm).
-        if(j<seq.length && seq[j].toLowerCase()==="m" && j>i+2) j--;
+        // If the DNA run is followed by e, the last A/C/G/U belongs to an MOE token (e.g., dCGe = dC + Ge).
+        if(j<seq.length && seq[j].toLowerCase()==="e" && j>i+2) j--;
         for(let k=i+1;k<j;k++) out.push("d" + seq[k].toUpperCase());
         i = j-1;
         continue;
