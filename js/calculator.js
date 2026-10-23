@@ -113,6 +113,12 @@ function getSet(setName){return DB.sets[setName];}
 function findParam(setName, key){
   const set=getSet(setName); if(!set) return null;
   const entries=set.entries || {};
+  // RNA/DNA entries use orientation-specific rXY/dZW keys; all 16 combinations are present.
+  // Generic keyVariants() tokenization does not accept the leading RNA "r" prefix.
+  if(setName.startsWith("RNA_DNA_")){
+    const rec=entries[key];
+    return rec ? {param:key, set:setName, rec, approx:false} : null;
+  }
   for(const k of keyVariants(key)){
     if(entries[k]) return {param:k, set:setName, rec:entries[k], approx:false};
   }
@@ -152,7 +158,9 @@ function constructRNADNAKey(top2, bot2){
   // Therefore dAdG/3′-UC-5′ is converted to 5′-CU-3′/5′-dAG-3′ = CU/dAG.
   const dna5 = compactDNA(top2);
   const rna5 = bot2.slice().reverse().join("");
-  return rna5 + "/" + dna5;
+  // RNA/DNA database keys explicitly prefix the RNA strand with "r" (e.g. rCU/dAG).
+  // Omitting this prefix silently marks all DNA/DNA nearest neighbors as missing.
+  return "r" + rna5 + "/" + dna5;
 }
 
 function chooseMixed(top2, bot2, condition){
