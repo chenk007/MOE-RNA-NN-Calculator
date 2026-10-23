@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-23_10sets_PS_corrected_initiation",
-  "source_excel": "10种NN parameter PS backbone 261023_2.xlsx",
+  "version": "2026-10-23_10sets_PS_dHdS_optimized",
+  "source_excel": "10种NN parameter PS backbone 261023_3.xlsx",
   "created": "2026-10-23",
   "modified_base_map": {
     "H": "2′-MOE-A",
@@ -1474,16 +1474,31 @@
     }
   },
   "ps_correction": {
-    "RNA": {
-      "dilute": 0.23,
-      "PEG": 0.13
-    },
     "DNA": {
-      "dilute": 0.18,
-      "PEG": 0.08
+      "dilute": {
+        "dH": 0.26715046,
+        "dS": 0.28394891
+      },
+      "PEG": {
+        "dH": 0.15288548,
+        "dS": 0.23579634
+      }
     },
-    "unit": "kcal mol-1 per PS linkage",
-    "applies_to": "Strand A only; fully PS modified by default",
-    "source": "Excel rows 310,311,319,320"
+    "RNA": {
+      "dilute": {
+        "dH": 0.39289125,
+        "dS": 0.52450686
+      },
+      "PEG": {
+        "dH": 0.20243432,
+        "dS": 0.21129577
+      }
+    },
+    "unit_dH": "kcal mol-1 per PS linkage",
+    "unit_dS": "cal mol-1 K-1 per PS linkage",
+    "temperature_K": 310.15,
+    "applies_to": "Strand A only; all L-1 linkages PS by default",
+    "method": "Origin-constrained least squares (3 duplexes in each type and condition); nPS = [9, 11, 12]; dG37 = dH - 310.15*dS/1000",
+    "source": "Experimental PS minus PO differences, 10种NN parameter PS backbone 261023_3.xlsx; coefficients calculated from six dilute and six PEG records"
   }
 }
