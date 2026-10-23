@@ -166,8 +166,9 @@ function chooseMixed(top2, bot2, condition){
     return {set:"RNA_DNA_"+suffix, key: constructRNADNAKey(top2, bot2), rule:"DNA/RNA hybrid"};
   }
   if(hasMOE && (hasDNA || hasRNA)){
+    if(hasDNA) return {set:"MOE_DNA_"+suffix, key:pairKey(top2,bot2), rule:"MOE–DNA junction"};
     const conv = convertTopForSet(top2,"ALT");
-    return {set:"ALT_"+suffix, key: pairKey(conv, bot2), rule: hasDNA ? "approx MOE-DNA junction: ALT" : "ALT local MOE/RNA", approx:true};
+    return {set:"ALT_"+suffix, key:pairKey(conv,bot2), rule:"ALT local MOE/RNA"};
   }
   if(hasRNA && hasDNA){
     // Mixed RNA-DNA junctions are uncommon in gapmer input; use DNA/RNA first if both residues are DNA, otherwise only approximate as a last resort.
@@ -238,8 +239,11 @@ function addCorrections(rows, strandA, strandB, mode){
   if(mode.startsWith("RNA_DNA")) baseSet = mode;
   const set=getSet(baseSet); if(!set) return;
 
-  // initiation
-  let init = correctionRecord(baseSet,"initiation");
+  // Any MOE-containing duplex uses the RRHD initiation of the same solution condition.
+  // The latest parameter workbook also makes ALT and RRHD initiation identical.
+  const hasMOE = strandA.some(isMOE) || strandB.some(isMOE);
+  const initiationSet = hasMOE ? "RRHD_"+suffix : baseSet;
+  let init = correctionRecord(initiationSet,"initiation");
   let initName = "initiation";
   if(!init && baseSet.startsWith("RNA_DNA")){
     // Use terminal content to pick RNA/DNA initiation class; otherwise add both? Here choose from terminal pairs.
@@ -248,7 +252,7 @@ function addCorrections(rows, strandA, strandB, mode){
     const key = (left==="GC" || right==="GC") ? "init. rG−dC and rC−dG" : "init. rA−dT or rU−dA";
     init=correctionRecord(baseSet,key); initName=key;
   }
-  if(init) addCorrection(rows,"initiation",initName,baseSet,init,"available initiation");
+  if(init) addCorrection(rows,"initiation",initName,initiationSet,init,"available initiation");
 
   // terminal correction for two terminals
   const terminalSets = [];
@@ -277,7 +281,26 @@ function addCorrections(rows, strandA, strandB, mode){
   }
 }
 
-function calculate(){
+
+// A single averaged PS factor applies to all selected Strand A linkages.
+// Only ΔG°37 is corrected because no PS ΔH° or ΔS° were provided.
+function applyPS(rows, A, condition, isBatch=false){
+  const prefix=isBatch?"batch":"";
+  if(!$(prefix+"PS").checked) return;
+  const input=$(prefix+"PSCount").value.trim();
+  const count=input===""?A.length-1:Number(input);
+  if(!Number.isInteger(count)||count<0||count>A.length-1)
+    throw new Error("PS linkage count must be an integer between 0 and L − 1.");
+  const selected=$(prefix+"PSType").value;
+  const type=selected==="auto"?(A.some(isDNA)?"DNA":"RNA"):selected;
+  const factor=DB.ps_correction[type][condition];
+  rows.push({pair:"PS backbone ("+count+" linkages)",used:(factor>=0?"+":"")+factor+" × "+count,
+    source:"PS "+type+" / "+condition,
+    rule:"Empirical ΔG°37 correction only; ΔH°/ΔS° not available",
+    dH:null,dS:null,dG:factor*count,correction:true,ps:true});
+}
+
+function calculate(options={}){
   try{
     const A=tokenize($("strandA").value);
     let B=tokenize($("strandB").value);
@@ -310,6 +333,7 @@ function calculate(){
       }
     }
     addCorrections(rows,A,B,mode);
+    applyPS(rows,A,condition,!!options.batch);
     lastRows=rows;
     render(rows);
   }catch(e){setMessage(e.message,"bad");}
@@ -319,7 +343,10 @@ function render(rows){
   const tbody=$("detail").querySelector("tbody"); tbody.innerHTML="";
   let sumH=0,sumS=0,sumG=0,missing=0,approx=0;
   rows.forEach((r,idx)=>{
-    if(typeof r.dH==="number"){sumH+=r.dH; sumS+=r.dS; sumG+=r.dG;} else missing++;
+    if(r.missing) missing++;
+    if(typeof r.dH==="number")sumH+=r.dH;
+    if(typeof r.dS==="number")sumS+=r.dS;
+    if(typeof r.dG==="number")sumG+=r.dG;
     if(r.approx) approx++;
     const tr=document.createElement("tr");
     if(r.approx) tr.classList.add("approx");
@@ -331,6 +358,7 @@ function render(rows){
   $("sumS").textContent=fmt(sumS);
   $("sumG").textContent=fmt(sumG);
   if(missing) setMessage(`Missing parameters: ${missing}. Approximate rows: ${approx}.`,"warn");
+  else if(rows.some(r=>r.ps)) setMessage(`Calculation completed. Approximate rows: ${approx}. PS correction changes ΔG°37 only; ΔH°/ΔS° are uncorrected PO estimates.`,"warn");
   else setMessage(`Calculation completed. Approximate rows: ${approx}.`);
 }
 
@@ -371,3 +399,65 @@ async function init(){
   calculate();
 }
 init();
+
+// ---- Batch calculation and classic-layout tabs ----
+let batchResultsCache = [];
+function q(id){return document.getElementById(id);}
+function batchTr(key, fallback){try{return window.I18N_T?window.I18N_T(key):fallback}catch(e){return fallback}}
+function parseBatchLine(line, idx){
+  const raw=line.trim(); if(!raw) return null;
+  const parts = raw.includes('\t') ? raw.split('\t') : raw.split(',');
+  const p=parts.map(x=>x.trim()).filter((x,i)=>i<3 || x!=='');
+  if(p.length===1) return {name:`Seq${idx}`,a:p[0],b:''};
+  if(p.length===2) return {name:p[0]||`Seq${idx}`,a:p[1],b:''};
+  return {name:p[0]||`Seq${idx}`,a:p[1],b:p[2]||''};
+}
+function updateBatchCount(){
+  if(!q('batchInput')) return;
+  const n=q('batchInput').value.split(/\r?\n/).filter(x=>x.trim()).length;
+  q('batchCount').textContent=`${n} input row${n===1?'':'s'}`;
+}
+function setBatchMessage(text,type=''){const m=q('batchMessage');if(!m)return;m.textContent=text;m.className='msg'+(type?' '+type:'');}
+function runBatch(){
+  const lines=q('batchInput').value.split(/\r?\n/).filter(x=>x.trim());
+  const entries=lines.map((l,i)=>parseBatchLine(l,i+1)).filter(Boolean);
+  const tbody=q('batchDetail').querySelector('tbody'); tbody.innerHTML=''; batchResultsCache=[];
+  if(!entries.length){setBatchMessage('No input rows.','warn');return;}
+  const old={a:q('strandA').value,b:q('strandB').value,mode:q('mode').value,corr:q('doCorr').checked,approx:q('doApprox').checked};
+  q('mode').value=q('batchMode').value; q('doCorr').checked=q('batchCorr').checked; q('doApprox').checked=q('batchApprox').checked;
+  entries.forEach((e,i)=>{
+    q('strandA').value=e.a; q('strandB').value=e.b;
+    if(!e.b){try{autoFillB();}catch(_){}}
+    calculate({batch:true});
+    const isBad=q('message').classList.contains('bad');
+    const isWarn=q('message').classList.contains('warn');
+    const approxCount=Array.isArray(lastRows)?lastRows.filter(r=>r.approx).length:0;
+    const rec={no:i+1,name:e.name,a:e.a,b:q('strandB').value,dH:isBad?'':q('sumH').textContent,dS:isBad?'':q('sumS').textContent,dG:isBad?'':q('sumG').textContent,approx:approxCount,status:isBad?q('message').textContent:(isWarn?'Warning':'OK')};
+    batchResultsCache.push(rec);
+    const tr=document.createElement('tr'); if(isBad)tr.classList.add('badrow'); else if(isWarn||approxCount)tr.classList.add('approx');
+    tr.innerHTML=`<td>${rec.no}</td><td>${rec.name}</td><td>${rec.a}</td><td>${rec.b}</td><td>${rec.dH}</td><td>${rec.dS}</td><td>${rec.dG}</td><td>${rec.approx}</td><td>${rec.status}</td>`;
+    tbody.appendChild(tr);
+  });
+  q('strandA').value=old.a;q('strandB').value=old.b;q('mode').value=old.mode;q('doCorr').checked=old.corr;q('doApprox').checked=old.approx;calculate();
+  const ok=batchResultsCache.filter(r=>r.status==='OK').length; const warn=batchResultsCache.length-ok;
+  setBatchMessage(`Batch completed: ${batchResultsCache.length} rows (${ok} OK, ${warn} with warnings/errors).`,warn?'warn':'');
+}
+function downloadBatchCSV(){
+  if(!batchResultsCache.length){setBatchMessage('No batch result to download.','warn');return;}
+  const header=['No','Name','Strand A 5to3','Strand B 3to5','dH kcal/mol','dS cal/mol/K','dG37 kcal/mol','Approx count','Status'];
+  const esc=x=>`"${String(x??'').replace(/"/g,'""')}"`;
+  const lines=[header.map(esc).join(',')].concat(batchResultsCache.map(r=>[r.no,r.name,r.a,r.b,r.dH,r.dS,r.dG,r.approx,r.status].map(esc).join(',')));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MOE_NN_batch_calculation.csv';a.click();URL.revokeObjectURL(a.href);
+}
+function showTab(which){
+  const single=which==='single';q('singlePanel').classList.toggle('hidden',!single);q('batchPanel').classList.toggle('hidden',single);q('tabSingle').classList.toggle('active',single);q('tabBatch').classList.toggle('active',!single);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  if(q('tabSingle'))q('tabSingle').addEventListener('click',()=>showTab('single'));
+  if(q('tabBatch'))q('tabBatch').addEventListener('click',()=>showTab('batch'));
+  if(q('batchCalc'))q('batchCalc').addEventListener('click',runBatch);
+  if(q('batchDownload'))q('batchDownload').addEventListener('click',downloadBatchCSV);
+  if(q('batchClear'))q('batchClear').addEventListener('click',()=>{q('batchInput').value='';q('batchDetail').querySelector('tbody').innerHTML='';batchResultsCache=[];updateBatchCount();setBatchMessage('Ready for batch calculation.')});
+  if(q('batchInput'))q('batchInput').addEventListener('input',updateBatchCount);
+  updateBatchCount();
+});
