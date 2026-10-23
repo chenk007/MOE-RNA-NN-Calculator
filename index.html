@@ -3,79 +3,134 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Web-based nearest-neighbor prediction of 2′-MOE oligonucleotide duplex stability under non-crowding and cell-like conditions.">
   <title>2′-MOE Oligonucleotide Stability Calculator</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<main class="wrap">
-  <section class="card hero">
-    <div>
-      <div class="eyebrow">Web-based nearest-neighbor prediction tool</div>
-      <h1>2′-MOE Oligonucleotide Stability Calculator</h1>
-      <p>Predict sequence-dependent Δ<i>H</i>°, Δ<i>S</i>° and Δ<i>G</i>°<sub>37</sub> values for RNA/RNA, RNA/DNA, 2′-MOE RNA/RNA and gapmer-type duplexes under non-crowding and cell-like conditions.</p>
+<main>
+  <section class="hero-shell">
+    <div class="hero-copy">
+      <div class="eyebrow" data-i18n="eyebrow">Web-based nearest-neighbor prediction tool</div>
+      <h1 data-i18n="title">2′-MOE Oligonucleotide Stability Calculator</h1>
+      <p class="intro" data-i18n-html="intro">Predict sequence-dependent Δ<i>H</i>°, Δ<i>S</i>° and Δ<i>G</i>°<sub>37</sub> values for RNA/RNA, RNA/DNA, RRHD-, ALT- and gapmer-type duplexes under non-crowding and cell-like conditions.</p>
+      <div class="summary-lines">
+        <p><b data-i18n="duplexesLabel">Duplexes:</b> <span data-i18n="duplexesText">RNA/RNA · RNA/DNA · fully 2′-MOE-modified RNA/RNA (RRHD) · partially 2′-MOE-modified RNA/RNA (ALT) · gapmer</span></p>
+        <p><b data-i18n="conditionsLabel">Conditions:</b> <span data-i18n="conditionsText">non-crowding · cell-like</span></p>
+        <p><b data-i18n="outputsLabel">Outputs:</b> <span data-i18n-html="outputsText">Δ<i>H</i>° · Δ<i>S</i>° · Δ<i>G</i>°<sub>37</sub> · NN breakdown · CSV</span></p>
+      </div>
     </div>
+
+    <aside class="howto-panel">
+      <div class="language-box">
+        <label for="language" data-i18n="language">Language</label>
+        <select id="language">
+          <option value="en">English</option>
+          <option value="zh">中文</option>
+          <option value="ja">日本語</option>
+          <option value="ko">한국어</option>
+        </select>
+      </div>
+      <h2 data-i18n="howToUse">How to use</h2>
+      <div class="steps">
+        <div class="step"><div class="stepno">1</div><div><h3 data-i18n="step1Title">Enter sequences</h3><p data-i18n="step1Text">Input Strand A and auto-fill Strand B.</p></div></div>
+        <div class="step"><div class="stepno">2</div><div><h3 data-i18n="step2Title">Select mode</h3><p data-i18n="step2Text">Choose the duplex type and solution condition.</p></div></div>
+        <div class="step"><div class="stepno">3</div><div><h3 data-i18n="step3Title">Calculate</h3><p data-i18n="step3Text">Run the prediction and review the outputs.</p></div></div>
+      </div>
+    </aside>
   </section>
 
   <div class="tabs" role="tablist">
-    <button class="tab active" id="tabSingle" type="button">Single calculation</button>
-    <button class="tab" id="tabBatch" type="button">Batch calculation</button>
+    <button class="tab active" id="tabSingle" type="button" data-i18n="singleTab">Single calculation</button>
+    <button class="tab" id="tabBatch" type="button" data-i18n="batchTab">Batch calculation</button>
   </div>
 
   <div id="singlePanel">
-    <section class="card">
-      <h2>Sequence Input</h2>
-      <div class="grid2">
-        <label>Strand A, 5′→3′ <span class="muted">modified, DNA-containing, or gapmer strand</span>
-          <textarea id="strandA" spellcheck="false">GeUeGeAeGeCeGe</textarea>
+    <section class="workspace">
+      <h2 class="section-title" data-i18n="sequenceInput">Sequence Input</h2>
+      <div class="instruction-strip">
+        <span class="mini-step">1</span>
+        <p><b data-i18n="sequenceInputBold">Sequence input.</b> <span data-i18n="sequenceInputHelp">Enter Strand A and Strand B in the fields below.</span><br><b data-i18n="acceptedNotationLabel">Accepted notation:</b> <span data-i18n="acceptedNotation">RNA, A/C/G/U; DNA, dA/dC/dG/dT; 2′-MOE RNA, Ae/Ce/Ge/Ue.</span></p>
+      </div>
+
+      <div class="sequence-grid">
+        <label><span data-i18n="strandALabel">Strand A, 5′→3′ modified, DNA-containing, or gapmer strand</span>
+          <textarea id="strandA" spellcheck="false">CeUeAeCeGeCeUeUe</textarea>
         </label>
-        <label>Strand B, 3′→5′ <span class="muted">RNA complementary strand</span>
+        <label><span data-i18n="strandBLabel">Strand B, 3′→5′ complementary RNA strand</span>
           <textarea id="strandB" spellcheck="false"></textarea>
         </label>
       </div>
-      <div class="row compact-row">
-        <button id="autofillB">Auto-fill Strand B</button>
-        <span class="muted">2′-MOE notation: Ae, Ce, Ge, Ue. DNA: dA, dC, dG, dT. Legacy H/J/K/L parameter notation is accepted internally.</span>
+
+      <div class="input-actions">
+        <button type="button" id="autofillB" data-i18n="autoFill">Auto-fill Strand B</button>
+        <span class="notation-line" data-i18n="notationLine">2′-MOE notation: Ae, Ce, Ge, Ue. DNA notation: dA, dC, dG, dT.</span>
       </div>
-      <div class="grid2">
-        <label>Calculation mode
+
+      <div class="instruction-strip compact step2strip">
+        <span class="mini-step">2</span>
+        <p><b data-i18n="modeSelectionBold">Mode Selection & Available Options.</b> <span data-i18n="modeSelectionHelp">Choose the duplex type and solution condition.</span><br><b data-i18n="duplexesLabel2">Duplexes:</b> <span data-i18n="duplexesText2">RNA/RNA; RNA/DNA; fully 2′-MOE-modified RNA/RNA (RRHD); partially 2′-MOE-modified RNA/RNA (ALT); gapmer.</span><br><b data-i18n="solutionsLabel">Solutions:</b> <span data-i18n="solutionsText">non-crowding; cell-like.</span></p>
+      </div>
+
+      <div class="mode-row">
+        <label><span data-i18n="calculationMode">Calculation mode</span>
           <select id="mode">
-            <option value="ALT_PEG">ALT-MOE/RNA, cell-like</option>
-            <option value="ALT_dilute">ALT-MOE/RNA, non-crowding</option>
-            <option value="RRHD_PEG" selected>RRHD-MOE/RNA, cell-like</option>
-            <option value="RRHD_dilute">RRHD-MOE/RNA, non-crowding</option>
-            <option value="unmodified_PEG">RNA/RNA, cell-like</option>
-            <option value="unmodified_dilute">RNA/RNA, non-crowding</option>
-            <option value="RNA_DNA_PEG">RNA/DNA, cell-like</option>
-            <option value="RNA_DNA_dilute">RNA/DNA, non-crowding</option>
-            <option value="mixed_PEG">Mixed gapmer auto, cell-like</option>
-            <option value="mixed_dilute">Mixed gapmer auto, non-crowding</option>
+            <option value="RRHD_PEG" selected data-i18n="modeRRHDPeg">RRHD-MOE/RNA, cell-like</option>
+            <option value="RRHD_dilute" data-i18n="modeRRHDDilute">RRHD-MOE/RNA, non-crowding</option>
+            <option value="ALT_PEG" data-i18n="modeALTPeg">ALT-MOE/RNA, cell-like</option>
+            <option value="ALT_dilute" data-i18n="modeALTDilute">ALT-MOE/RNA, non-crowding</option>
+            <option value="unmodified_PEG" data-i18n="modeRNAPeg">RNA/RNA, cell-like</option>
+            <option value="unmodified_dilute" data-i18n="modeRNADilute">RNA/RNA, non-crowding</option>
+            <option value="RNA_DNA_PEG" data-i18n="modeDNAPeg">RNA/DNA, cell-like</option>
+            <option value="RNA_DNA_dilute" data-i18n="modeDNADilute">RNA/DNA, non-crowding</option>
+            <option value="mixed_PEG" data-i18n="modeGapPeg">Mixed gapmer auto, cell-like</option>
+            <option value="mixed_dilute" data-i18n="modeGapDilute">Mixed gapmer auto, non-crowding</option>
           </select>
         </label>
-        <label>Temperature for display, °C
-          <input id="tempC" type="number" value="37" step="0.1">
-        </label>
       </div>
+
       <div class="options-inline">
-        <label class="check"><input id="doCorr" type="checkbox" checked> Include initiation / terminal / self-complementary corrections</label>
-        <label class="check"><input id="doApprox" type="checkbox" checked> Enable approximation rules</label>
+        <label class="check"><input id="doCorr" type="checkbox" checked> <span data-i18n="corrOption">Include initiation / terminal / self-complementary corrections</span></label>
+        <label class="check"><input id="doApprox" type="checkbox" checked> <span data-i18n="approxOption">Allow parameter approximation when an exact parameter is unavailable</span></label>
       </div>
-      <div class="row">
-        <button id="calc">Calculate</button>
-        <button id="download">Download CSV</button>
+      <p class="self-note" data-i18n="selfNote">The self-complementary correction is applied automatically only when Strand A is identical to its own reverse-complement sequence.</p>
+
+<div class="ps-options">
+  <label class="check"><input id="PS" type="checkbox" checked> <span data-i18n="psToggle">Include PS backbone correction (ΔG°37 only)</span></label>
+  <div class="ps-grid">
+    <label><span data-i18n="psCount">PS linkages (blank = L − 1)</span><input id="PSCount" type="number" min="0" step="1" placeholder="L − 1"></label>
+    <label><span data-i18n="psClass">PS correction type</span><select id="PSType">
+      <option value="auto" data-i18n="psAuto">Auto (DNA-containing: RNA–PS–DNA)</option>
+      <option value="RNA">RNA–PS–RNA</option>
+      <option value="DNA">RNA–PS–DNA</option>
+    </select></label>
+  </div>
+  <p class="ps-hint" data-i18n="psHint">All L − 1 internucleotide linkages in Strand A are PS by default. Only ΔG°37 is adjusted.</p>
+</div>
+      <div class="execution-row">
+        <div class="buttons">
+          <button type="button" id="calc" data-i18n="calculate">Calculate</button>
+          <button type="button" id="download" data-i18n="downloadCsv">Download CSV</button>
+        </div>
+        <div class="instruction-strip compact execution-help">
+          <span class="mini-step">3</span>
+          <p><b data-i18n="executionBold">Execution & Output.</b> <span data-i18n-html="executionHelp">Click Calculate to obtain Δ<i>H</i>°, Δ<i>S</i>°, Δ<i>G</i>°<sub>37</sub> and the detailed NN contribution breakdown.</span></p>
+        </div>
       </div>
+      <div id="message" class="msg">Ready.</div>
     </section>
 
-    <section class="card">
-      <h2>Thermodynamic Parameters</h2>
-      <div id="message" class="msg">Ready.</div>
+    <section class="results-section">
+      <h2 class="section-title"><span data-i18n="predictedParameters">Predicted Thermodynamic Parameters</span> <small data-i18n="outputSubtitle">Step 3 output: total values and NN contribution details</small></h2>
       <div class="summary">
-        <div><span>Δ<i>H</i>° total</span><b id="sumH">—</b><small>kcal mol<sup>−1</sup></small></div>
-        <div><span>Δ<i>S</i>° total</span><b id="sumS">—</b><small>cal mol<sup>−1</sup> K<sup>−1</sup></small></div>
-        <div><span>Δ<i>G</i>°<sub>37</sub> total</span><b id="sumG">—</b><small>kcal mol<sup>−1</sup></small></div>
+        <div><span>Δ<i>H</i>° <span data-i18n="total">total</span> (kcal mol<sup>−1</sup>)</span><b id="sumH">—</b></div>
+        <div><span>Δ<i>S</i>° <span data-i18n="total">total</span> (cal mol<sup>−1</sup> K<sup>−1</sup>)</span><b id="sumS">—</b></div>
+        <div><span>Δ<i>G</i>°<sub>37</sub> <span data-i18n="total">total</span> (kcal mol<sup>−1</sup>)</span><b id="sumG">—</b></div>
       </div>
+      <h3 data-i18n="nnContributions">Nearest-neighbor contributions</h3>
       <div class="tablewrap">
         <table id="detail">
-          <thead><tr><th>#</th><th>NN pair / correction</th><th>Used parameter</th><th>Source set</th><th>Rule</th><th>Δ<i>H</i>°</th><th>Δ<i>S</i>°</th><th>Δ<i>G</i>°<sub>37</sub></th></tr></thead>
+          <thead><tr><th>#</th><th data-i18n="nnPair">NN pair / correction</th><th data-i18n="usedParameter">Used parameter</th><th data-i18n="sourceSet">Source set</th><th data-i18n="rule">Rule</th><th>Δ<i>H</i>°</th><th>Δ<i>S</i>°</th><th>Δ<i>G</i>°<sub>37</sub></th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -83,88 +138,94 @@
   </div>
 
   <div id="batchPanel" class="hidden">
-    <section class="card">
-      <h2>Batch Calculation</h2>
-      <p class="muted batch-intro">Paste directly from Excel or CSV. Accepted formats: <b>Sequence</b>, <b>Name + Sequence</b>, or <b>Name + Strand A + Strand B</b>. Columns may be separated by tabs or commas. When Strand B is omitted, the RNA complement is generated automatically.</p>
-      <div class="grid2">
-        <label>Calculation mode
+    <section class="workspace">
+      <h2 class="section-title" data-i18n="batchTitle">Batch Calculation</h2>
+      <div class="instruction-strip">
+        <span class="mini-step">1</span>
+        <p><b data-i18n="batchPasteBold">Paste sequences from Excel or CSV.</b> <span data-i18n="batchPasteText">Accepted rows: Sequence; Name + Sequence; or Name + Strand A + Strand B. If Strand B is omitted, it is generated automatically.</span></p>
+      </div>
+      <div class="batch-toolbar">
+        <label><span data-i18n="calculationMode">Calculation mode</span>
           <select id="batchMode">
-            <option value="ALT_PEG">ALT-MOE/RNA, cell-like</option>
-            <option value="ALT_dilute">ALT-MOE/RNA, non-crowding</option>
-            <option value="RRHD_PEG" selected>RRHD-MOE/RNA, cell-like</option>
-            <option value="RRHD_dilute">RRHD-MOE/RNA, non-crowding</option>
-            <option value="unmodified_PEG">RNA/RNA, cell-like</option>
-            <option value="unmodified_dilute">RNA/RNA, non-crowding</option>
-            <option value="RNA_DNA_PEG">RNA/DNA, cell-like</option>
-            <option value="RNA_DNA_dilute">RNA/DNA, non-crowding</option>
-            <option value="mixed_PEG">Mixed gapmer auto, cell-like</option>
-            <option value="mixed_dilute">Mixed gapmer auto, non-crowding</option>
+            <option value="RRHD_PEG" selected data-i18n="modeRRHDPeg">RRHD-MOE/RNA, cell-like</option>
+            <option value="RRHD_dilute" data-i18n="modeRRHDDilute">RRHD-MOE/RNA, non-crowding</option>
+            <option value="ALT_PEG" data-i18n="modeALTPeg">ALT-MOE/RNA, cell-like</option>
+            <option value="ALT_dilute" data-i18n="modeALTDilute">ALT-MOE/RNA, non-crowding</option>
+            <option value="unmodified_PEG" data-i18n="modeRNAPeg">RNA/RNA, cell-like</option>
+            <option value="unmodified_dilute" data-i18n="modeRNADilute">RNA/RNA, non-crowding</option>
+            <option value="RNA_DNA_PEG" data-i18n="modeDNAPeg">RNA/DNA, cell-like</option>
+            <option value="RNA_DNA_dilute" data-i18n="modeDNADilute">RNA/DNA, non-crowding</option>
+            <option value="mixed_PEG" data-i18n="modeGapPeg">Mixed gapmer auto, cell-like</option>
+            <option value="mixed_dilute" data-i18n="modeGapDilute">Mixed gapmer auto, non-crowding</option>
           </select>
         </label>
-        <div class="batch-options">
-          <label class="check"><input id="batchCorr" type="checkbox" checked> Include corrections</label>
-          <label class="check"><input id="batchApprox" type="checkbox" checked> Enable approximation rules</label>
+        <div class="batch-checks">
+          <label class="check"><input id="batchCorr" type="checkbox" checked> <span data-i18n="includeCorrections">Include corrections</span></label>
+          <label class="check"><input id="batchApprox" type="checkbox" checked> <span data-i18n="enableApprox">Enable approximation rules</span></label>
         </div>
       </div>
-      <label>Sequences
-        <textarea id="batchInput" class="batch-input" spellcheck="false">Seq1	GeUeGeAeGeCeGe
+<div class="ps-options">
+  <label class="check"><input id="batchPS" type="checkbox" checked> <span data-i18n="psToggle">Include PS backbone correction (ΔG°37 only)</span></label>
+  <div class="ps-grid">
+    <label><span data-i18n="psCount">PS linkages (blank = L − 1)</span><input id="batchPSCount" type="number" min="0" step="1" placeholder="L − 1"></label>
+    <label><span data-i18n="psClass">PS correction type</span><select id="batchPSType">
+      <option value="auto" data-i18n="psAuto">Auto (DNA-containing: RNA–PS–DNA)</option>
+      <option value="RNA">RNA–PS–RNA</option>
+      <option value="DNA">RNA–PS–DNA</option>
+    </select></label>
+  </div>
+  <p class="ps-hint" data-i18n="psHint">All L − 1 internucleotide linkages in Strand A are PS by default. Only ΔG°37 is adjusted.</p>
+</div>
+      <label class="batch-input-label"><span data-i18n="sequences">Sequences</span>
+        <textarea id="batchInput" class="batch-input" spellcheck="false">Seq1	CeUeAeCeGeCeUeUe
 Seq2	AeCeGeUeAeCeGeUe
 Seq3	GeAeUeCeGeAeUeCe</textarea>
       </label>
-      <div class="row compact-row">
-        <button id="batchCalc">Batch calculate</button>
-        <button id="batchDownload">Download batch CSV</button>
-        <button id="batchClear" class="secondary">Clear</button>
-        <span id="batchCount" class="muted">3 input rows</span>
+      <div class="input-actions">
+        <button id="batchCalc" type="button" data-i18n="batchCalculate">Batch calculate</button>
+        <button id="batchDownload" type="button" data-i18n="downloadBatchCsv">Download batch CSV</button>
+        <button id="batchClear" type="button" class="secondary" data-i18n="clear">Clear</button>
+        <span id="batchCount" class="notation-line">3 input rows</span>
       </div>
       <div id="batchMessage" class="msg">Ready for batch calculation.</div>
     </section>
 
-    <section class="card">
-      <div class="section-title-row">
-        <h2>Batch Results</h2>
-        <span class="muted">Each row is calculated independently; an invalid sequence does not stop the remaining rows.</span>
-      </div>
+    <section class="results-section">
+      <h2 class="section-title" data-i18n="batchResults">Batch Results</h2>
       <div class="tablewrap">
         <table id="batchDetail">
-          <thead><tr><th>#</th><th>Name</th><th>Strand A (5′→3′)</th><th>Strand B (3′→5′)</th><th>Δ<i>H</i>°</th><th>Δ<i>S</i>°</th><th>Δ<i>G</i>°<sub>37</sub></th><th>Approx.</th><th>Status</th></tr></thead>
+          <thead><tr><th>#</th><th data-i18n="name">Name</th><th>Strand A (5′→3′)</th><th>Strand B (3′→5′)</th><th>Δ<i>H</i>°</th><th>Δ<i>S</i>°</th><th>Δ<i>G</i>°<sub>37</sub></th><th data-i18n="approx">Approx.</th><th data-i18n="status">Status</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
     </section>
   </div>
 
-  <section class="card">
-    <h2>How to use</h2>
-    <div class="how-grid">
-      <div><b>1. Enter sequences</b><span>Use Ae/Ce/Ge/Ue for 2′-MOE residues. For batch work, paste a column directly from Excel.</span></div>
-      <div><b>2. Select mode</b><span>Choose duplex chemistry and non-crowding or cell-like conditions.</span></div>
-      <div><b>3. Calculate</b><span>Review Δ<i>H</i>°, Δ<i>S</i>°, Δ<i>G</i>°<sub>37</sub> and export results as CSV.</span></div>
-    </div>
+  <section class="info-section">
+    <h2 class="section-title" data-i18n="parameterDescription">Parameter set description</h2>
+    <p data-i18n-html="notationDescription"><b>Sequence notation:</b> Ae, Ce, Ge and Ue represent 2′-MOE-A, 2′-MOE-C, 2′-MOE-G and 2′-MOE-U, respectively. DNA residues are written as dA, dC, dG and dT.</p>
+    <p data-i18n-html="rrhdAltDescription"><b>RRHD:</b> one strand is fully 2′-MOE modified and hybridized with RNA. <b>ALT:</b> one strand contains partial/intermittent 2′-MOE modifications and is hybridized with RNA. <b>The 2′-MOE-specific RRHD and ALT nearest-neighbor parameters used in this calculator were determined in the present work.</b></p>
+    <p data-i18n-html="gapmerDescription"><b>Gapmer:</b> terminal wings are 2′-MOE modified and the central gap is DNA. Local regions are assigned to RRHD, RNA/DNA, ALT and MOE–DNA junction parameters.</p>
+    <p data-i18n-html="conditionDescription"><b>Non-crowding condition:</b> 100 mM NaCl, 10 mM Na<sub>2</sub>HPO<sub>4</sub> (pH 7.0 at 37 °C), and 1 mM Na<sub>2</sub>EDTA. <b>Cell-like condition:</b> the same buffer containing 40 wt% PEG200.</p>
+    <p><span data-i18n="parameterVersion">Current parameter version:</span> <b>23 October 2026</b>.</p>
   </section>
 
-  <section class="card">
-    <h2>Parameter set description</h2>
-    <p><b>Sequence notation:</b> Ae, Ce, Ge and Ue represent 2′-MOE-A, 2′-MOE-C, 2′-MOE-G and 2′-MOE-U, respectively. DNA residues are written as dA, dC, dG and dT.</p>
-    <p><b>RRHD:</b> one strand is fully 2′-MOE modified and hybridized with RNA. <b>ALT:</b> one strand contains partial/intermittent 2′-MOE modifications and is hybridized with RNA. <b>The 2′-MOE-specific RRHD and ALT nearest-neighbor parameters used in this calculator were determined in the present work.</b></p>
-    <p><b>Gapmer:</b> terminal wings are 2′-MOE modified and the central gap is DNA. Local regions are assigned to RRHD, RNA/DNA, or ALT-based junction parameters.</p>
-    <p><b>Non-crowding condition:</b> 100 mM NaCl, 10 mM Na<sub>2</sub>HPO<sub>4</sub> (pH 7.0 at 37 °C), and 1 mM Na<sub>2</sub>EDTA. <b>Cell-like condition:</b> the same buffer containing 40 wt% PEG200.</p>
-    <p>Self-complementary correction is applied only when Strand A is identical to its own reverse-complement sequence.</p>
-    <p class="muted"><b>Parameter version:</b> 17 September 2026.</p>
+  <section class="info-section">
+    <p><b>PS backbone correction:</b> Default number of modified linkages in Strand A is L − 1. The per-linkage ΔG°37 corrections are +0.23 (non-crowding) / +0.13 (cell-like) kcal mol−1 for RNA–PS–RNA and +0.18 / +0.08 kcal mol−1 for RNA–PS–DNA. ΔH° and ΔS° corrections are not available.</p>
   </section>
-
-  <section class="card">
-    <h2>References and parameter sources</h2>
-    <p><b>Modified 2′-MOE parameters:</b> the RRHD and ALT nearest-neighbor parameter sets used in this calculator are from the present work.</p>
-    <ol class="refs">
-      <li>Sugimoto, N., Kierzek, R. and Turner, D.H. (1987) <i>Biochemistry</i>, 26.</li>
-      <li>Ghosh, S., Takahashi, S., Banerjee, D., Ohyama, T., Endoh, T., Tateishi-Karimata, H. and Sugimoto, N. (2023) <i>Nucleic Acids Res.</i>, 51, 4101–4111.</li>
-      <li>Banerjee, D., Tateishi-Karimata, H., Ohyama, T., Ghosh, S., Endoh, T., Takahashi, S. and Sugimoto, N. (2020) <i>Nucleic Acids Res.</i>, 48, 12042.</li>
-      <li>Banerjee, D., Tateishi-Karimata, H., Toplishek, M., Ohyama, T., Ghosh, S., Takahashi, S., Trajkovski, M., Plavec, J. and Sugimoto, N. (2023) <i>J. Am. Chem. Soc.</i>, 145, 23503.</li>
+  <section class="references-section">
+    <h2 class="section-title" data-i18n="referencesTitle">References and parameter sources</h2>
+    <p data-i18n-html="presentWorkNote"><b>Modified 2′-MOE parameters:</b> the RRHD and ALT nearest-neighbor parameter sets used in this calculator are from the present work.</p>
+    <ol class="reference-list">
+      <li>Sugimoto, N.; Kierzek, R.; Turner, D. H. <i>Biochemistry</i> <b>1987</b>, <i>26</i>.</li>
+      <li>Banerjee, D.; Tateishi-Karimata, H.; Ohyama, T.; Ghosh, S.; Endoh, T.; Takahashi, S.; Sugimoto, N. <i>Nucleic Acids Res.</i> <b>2020</b>, <i>48</i>, 12042.</li>
+      <li>Ghosh, S.; Takahashi, S.; Banerjee, D.; Ohyama, T.; Endoh, T.; Tateishi-Karimata, H.; Sugimoto, N. <i>Nucleic Acids Res.</i> <b>2023</b>, <i>51</i>, 4101–4111.</li>
+      <li>Banerjee, D.; Tateishi-Karimata, H.; Toplishek, M.; Ohyama, T.; Ghosh, S.; Takahashi, S.; Trajkovski, M.; Plavec, J.; Sugimoto, N. <i>J. Am. Chem. Soc.</i> <b>2023</b>, <i>145</i>, 23503.</li>
     </ol>
   </section>
 </main>
 <script src="js/parameters.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/calculator.js"></script>
 </body>
 </html>
