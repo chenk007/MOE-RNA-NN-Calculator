@@ -1,6 +1,6 @@
 # 2′-MOE Oligonucleotide Stability Calculator
 
-Parameter version: **17 September 2026**.
+Parameter version: **23 OCT 2026**.
 
 This static website predicts nearest-neighbor thermodynamic parameters for RNA/RNA, RNA/DNA, fully 2′-MOE-modified RNA/RNA (RRHD), partially 2′-MOE-modified RNA/RNA (ALT), and mixed gapmer duplexes under non-crowding and cell-like conditions.
 
