@@ -1,7 +1,7 @@
 window.MOE_NN_PARAMETERS = {
-  "version": "2026-10-23_10sets_PS_dHdS_optimized",
-  "source_excel": "10种NN parameter PS backbone 261023_3.xlsx",
-  "created": "2026-10-23",
+  "version": "2026-10-28_10sets_PS_dHdS_fixed",
+  "source_excel": "10种NN parameter PS backbone 261028.xlsx (PS correction updated; NN sets preserved from working 261023 version)",
+  "created": "2026-10-28",
   "modified_base_map": {
     "H": "2′-MOE-A",
     "J": "2′-MOE-C",
@@ -1476,29 +1476,34 @@ window.MOE_NN_PARAMETERS = {
   "ps_correction": {
     "DNA": {
       "dilute": {
-        "dH": 0.26715046,
-        "dS": 0.28394891
+        "dH": 0.2743519817187028,
+        "dS": 0.29984815295525197,
+        "dG": 0.18135407707963158
       },
       "PEG": {
-        "dH": 0.15288548,
-        "dS": 0.23579634
+        "dH": 0.15407061539296674,
+        "dS": 0.23934129392828132,
+        "dG": 0.0798389130811099
       }
     },
     "RNA": {
       "dilute": {
-        "dH": 0.39289125,
-        "dS": 0.52450686
+        "dH": -0.003381087966263196,
+        "dS": -0.6542259141246589,
+        "dG": 0.19952707929950117
       },
       "PEG": {
-        "dH": 0.20243432,
-        "dS": 0.21129577
+        "dH": 0.09056956535143044,
+        "dS": -0.08329357835046165,
+        "dG": 0.1164030686768258
       }
     },
     "unit_dH": "kcal mol-1 per PS linkage",
     "unit_dS": "cal mol-1 K-1 per PS linkage",
+    "unit_dG": "kcal mol-1 per PS linkage",
     "temperature_K": 310.15,
     "applies_to": "Strand A only; all L-1 linkages PS by default",
-    "method": "Origin-constrained least squares (3 duplexes in each type and condition); nPS = [9, 11, 12]; dG37 = dH - 310.15*dS/1000",
-    "source": "Experimental PS minus PO differences, 10种NN parameter PS backbone 261023_3.xlsx; coefficients calculated from six dilute and six PEG records"
+    "method": "Empirical per-linkage thermodynamic PS corrections; dG37 = dH - 310.15*dS/1000",
+    "source": "10种NN parameter PS backbone 261028.xlsx (28 October 2026)"
   }
 };
