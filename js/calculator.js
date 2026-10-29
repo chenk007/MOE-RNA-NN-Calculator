@@ -290,9 +290,8 @@ function addCorrections(rows, strandA, strandB, mode){
 }
 
 
-// Empirical PS linkage thermodynamic corrections (not sequence-resolved NN terms).
-// Fit ΔΔH° and ΔΔS° through the origin against PS linkage count (9, 11, 12).
-// Calculate ΔΔG°37 from ΔΔH° − 310.15 K × ΔΔS° / 1000; do not double-count old ΔG-only correction.
+// A single averaged PS factor applies to all selected Strand A linkages.
+// Only ΔG°37 is corrected because no PS ΔH° or ΔS° were provided.
 function applyPS(rows, A, condition, isBatch=false){
   const prefix=isBatch?"batch":"";
   if(!$(prefix+"PS").checked) return;
@@ -302,17 +301,20 @@ function applyPS(rows, A, condition, isBatch=false){
     throw new Error("PS linkage count must be an integer between 0 and L − 1.");
   const selected=$(prefix+"PSType").value;
   const type=selected==="auto"?(A.some(isDNA)?"DNA":"RNA"):selected;
-  const factor=DB.ps_correction[type][condition];
+  const factor=DB.ps_correction?.[type]?.[condition];
   if(!factor || typeof factor.dH!=="number" || typeof factor.dS!=="number")
-    throw new Error("Missing PS ΔH°/ΔS° correction factors for selected type/condition.");
+    throw new Error("Missing PS ΔH°/ΔS° correction parameters for the selected type/condition.");
+  const T=DB.ps_correction.temperature_K || 310.15;
   const dH=factor.dH*count;
   const dS=factor.dS*count;
-  const dG=dH-(DB.ps_correction.temperature_K || 310.15)*dS/1000;
-  rows.push({pair:"PS backbone ("+count+" linkages)",
+  const dG=dH-T*dS/1000;
+  rows.push({
+    pair:"PS backbone ("+count+" linkages)",
     used:`δH=${factor.dH.toFixed(6)}, δS=${factor.dS.toFixed(6)} × ${count}`,
     source:"PS "+type+" / "+condition,
-    rule:"Empirical per-linkage ΔH°/ΔS° correction; ΔG°37 derived at 310.15 K",
-    dH,dS,dG,correction:true,ps:true});
+    rule:"Empirical per-linkage ΔH°/ΔS° correction; ΔG°37 derived from ΔH° − TΔS°",
+    dH,dS,dG,correction:true,ps:true
+  });
 }
 
 function calculate(options={}){
@@ -373,7 +375,7 @@ function render(rows){
   $("sumS").textContent=fmt(sumS);
   $("sumG").textContent=fmt(sumG);
   if(missing) setMessage(`Missing parameters: ${missing}. Approximate rows: ${approx}.`,"warn");
-  else if(rows.some(r=>r.ps)) setMessage(`Calculation completed. Approximate rows: ${approx}. PS ΔH°/ΔS° corrections included; ΔG°37 derived from these corrections.`,"warn");
+  else if(rows.some(r=>r.ps)) setMessage(`Calculation completed. Approximate rows: ${approx}. PS backbone correction is included in ΔH°, ΔS°, and ΔG°37.`,"warn");
   else setMessage(`Calculation completed. Approximate rows: ${approx}.`);
 }
 
